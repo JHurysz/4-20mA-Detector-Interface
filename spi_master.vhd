@@ -101,7 +101,7 @@ begin
                         rx_data              <= rx_data(G_NUM_BITS-2 downto 0) & I_MISO;
 
                         if(spi_bit_cnt>0) then
-                            spi_bit_cnt       <= spi_bit_cnt - 1;
+                            spi_bit_cnt      <= spi_bit_cnt - 1;
                         end if;
 
                     elsif (sclk_fall='1') then
@@ -171,7 +171,7 @@ begin
             end if;
 
             if I_RST then
-                clk_cnt                  <= 0;
+                clk_cnt                  <=  0;
                 sclk_rise                <= '0';
                 sclk_fall                <= '0';
             end if;
