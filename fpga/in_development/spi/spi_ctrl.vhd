@@ -1,3 +1,9 @@
+------------------------------------------------
+-- Team:      WCP03 4-20mA Detector Interface --
+-- Company:   Binghamton University           --
+-- Author(s): Joe Hurysz                      --
+------------------------------------------------
+
 library ieee;
 use     ieee.std_logic_1164.all;
 use     ieee.numeric_std.all;

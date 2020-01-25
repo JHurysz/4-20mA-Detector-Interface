@@ -1,3 +1,9 @@
+------------------------------------------------
+-- Team:      WCP03 4-20mA Detector Interface --
+-- Company:   Binghamton University           --
+-- Author(s): Joe Hurysz                      --
+------------------------------------------------
+
 library ieee;
 use     ieee.std_logic_1164.all;
 use     ieee.numeric_std.all;
@@ -29,7 +35,7 @@ begin
     -- NOTE: Will have to add some sort of storage for current ADC being sampled.
     -- This is relevant in the case that we want to give precedence to logging data over SPI
     -- and need to remember which DEVICE ID we were sampling before logging
-    
+
     Arbiter : process(I_CLK) begin
         if rising_edge(I_CLK) then
             if I_RST = '1' then
