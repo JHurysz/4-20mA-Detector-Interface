@@ -1,1 +1,1 @@
-# 4-20uA-Detector-Interface
+4-20mA Detector Interface Senior Design Project WCP03
