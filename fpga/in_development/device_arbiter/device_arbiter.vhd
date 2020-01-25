@@ -26,6 +26,10 @@ architecture BEHAVIORAL of DEVICE_ARBITER_1_0 is
 
 begin
 
+    -- NOTE: Will have to add some sort of storage for current ADC being sampled.
+    -- This is relevant in the case that we want to give precedence to logging data over SPI
+    -- and need to remember which DEVICE ID we were sampling before logging
+    
     Arbiter : process(I_CLK) begin
         if rising_edge(I_CLK) then
             if I_RST = '1' then
@@ -47,5 +51,4 @@ begin
             end if;
         end if;
     end process Arbiter;
-
 end BEHAVIORAL ; 
