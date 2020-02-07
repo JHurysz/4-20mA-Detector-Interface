@@ -8,7 +8,7 @@ library ieee;
 use     ieee.std_logic_1164.all;
 use     ieee.numeric_std.all;
 
-entity DEVICE_ARBITER_1_0 is
+entity DEVICE_ARBITER is
   port (
     I_CLK         : in std_logic;
     I_RST         : in std_logic;
@@ -19,10 +19,10 @@ entity DEVICE_ARBITER_1_0 is
     I_HUMIDITY_ID : in std_logic; -- ID 3 (BOTTOM PB)
     I_DATA_LOG_EN : in std_logic;
 
-    O_DEVICE_ID   : out std_logic_vector(2 downto 0));
-end DEVICE_ARBITER_1_0;
+    O_DEVICE_ID   : out std_logic_vector(1 downto 0));
+end DEVICE_ARBITER;
 
-architecture BEHAVIORAL of DEVICE_ARBITER_1_0 is
+architecture BEHAVIORAL of DEVICE_ARBITER is
 
     constant C_SAMPLE_VOLTAGE  : std_logic_vector(2 downto 0) := "00";
     constant C_SAMPLE_CURRENT  : std_logic_vector(2 downto 0) := "01";
