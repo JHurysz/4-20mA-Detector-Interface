@@ -100,12 +100,12 @@ begin
       wait for C_CLK_PERIOD*10;
 
       for i in C_TEST_DATA'range loop
-          I_HEX_DATA_IN_0 <= C_TEST_DATA(i).I_HEX_DATA_IN_0;
-          I_HEX_DATA_IN_1 <= C_TEST_DATA(i).I_HEX_DATA_IN_1;
-          I_HEX_DATA_IN_2 <= C_TEST_DATA(i).I_HEX_DATA_IN_2;
-          I_HEX_DATA_IN_3 <= C_TEST_DATA(i).I_HEX_DATA_IN_3;
-          I_DP            <= C_TEST_DATA(i).I_DP;
-          wait for clk_period * 4095;
+          I_HEX_DATA_IN_0       <= C_TEST_DATA(i).I_HEX_DATA_IN_0;
+          I_HEX_DATA_IN_1       <= C_TEST_DATA(i).I_HEX_DATA_IN_1;
+          I_HEX_DATA_IN_2       <= C_TEST_DATA(i).I_HEX_DATA_IN_2;
+          I_HEX_DATA_IN_3       <= C_TEST_DATA(i).I_HEX_DATA_IN_3;
+          I_DP                  <= C_TEST_DATA(i).I_DP;
+          wait for C_CLK_PERIOD * 4095;
       end loop;
       wait;
    end process Stimulus;
