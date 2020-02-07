@@ -40,9 +40,13 @@ architecture BEHAVIORAL of SPI_TX_RX is
 
     constant C_CONFIG_WORDS : std_logic_vector(15 downto 0) := WORDS;
 
-    signal spi_bit_count : std_logic_vector(4 downto 0);
+    signal spi_bit_count : std_logic_vector( 4 downto 0);
     signal config_reg    : std_logic_vector(16 downto 0); -- just a guess on size
-
+    signal data_reg      : std_logic_vector(15 downto 0);
+    signal tmp_voltage_reg : std_logic_vector(15 downto 0) := (others => '0');
+    signal tmp_current_reg : std_logic_vector(15 downto 0) := (others => '0');
+    signal tmp_temp_reg : std_logic_vector(15 downto 0) := (others => '0');
+    signal tmp_humidity_reg : std_logic_vector(15 downto 0) := (others => '0');
 begin
 
     -- 5 Bit SPI Counter --
@@ -75,4 +79,52 @@ begin
     end process Configuration_Shift_Register;
 
     O_MOSI <= config_reg(16); -- MSB
+
+    -- Data Register --
+    Data_Shift_Register : process(I_CLK) begin
+        if rising_edge(I_CLK) then
+			if I_LD_DATA_REG = '1' then
+				 data_reg <= data_reg(14 downto 0) & I_MISO;
+			end if;
+		end if;
+    end process Data_Shift_Register;
+    
+    -- Data out Register -- 
+    Output_Shift_Register : process(I_CLK) begin
+        if rising_edge(I_CLK) then
+
+            -- Defaults
+            tmp_voltage_reg  <= tmp_voltage_reg;
+            tmp_current_reg  <= tmp_current_reg;
+            tmp_temp_reg     <= tmp_temp_reg;
+            tmp_humidity_reg <= tmp_humidity_reg;
+
+            case I_DEVICE_ID is
+                when "00" => -- Voltage
+                    tmp_voltage_reg  <= data_reg;
+
+                when "00" => -- Current
+                    tmp_current_reg  <= data_reg;
+
+                when "00" => -- Temp
+                    tmp_temp_reg     <= data_reg;
+
+                when "00" => -- Humidity
+                    tmp_humidity_reg <= data_reg
+
+                when others => -- Shouldn't Happen
+                    tmp_voltage_reg <= tmp_voltage_reg;
+                    tmp_current_reg <= tmp_current_reg;
+                    tmp_temp_reg    <= tmp_temp_reg;
+                    tmp_humidity_reg<= tmp_humidity_reg;
+            end case;
+        end if;    
+    end process Output_Shift_Register;
+
+    -- Output Register Assignments
+    O_VOLTAGE_REG <= tmp_voltage_reg;
+    O_CURRENT_REG <= tmp_current_reg;
+    O_TEMP_REG    <= tmp_temp_reg;
+    O_HUMIDITY_REG <= tmp_humidity_reg;
+    
 end BEHAVIORAL;
