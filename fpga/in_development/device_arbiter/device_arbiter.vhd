@@ -24,11 +24,10 @@ end DEVICE_ARBITER_1_0;
 
 architecture BEHAVIORAL of DEVICE_ARBITER_1_0 is
 
-    constant C_SAMPLE_VOLTAGE  : std_logic_vector(2 downto 0) := "000";
-    constant C_SAMPLE_CURRENT  : std_logic_vector(2 downto 0) := "001";
-    constant C_SAMPLE_TEMP     : std_logic_vector(2 downto 0) := "010";
-    constant C_SAMPLE_HUMIDITY : std_logic_vector(2 downto 0) := "011";
-    constant C_LOG_DATA        : std_logic_vector(2 downto 0) := "100";
+    constant C_SAMPLE_VOLTAGE  : std_logic_vector(2 downto 0) := "00";
+    constant C_SAMPLE_CURRENT  : std_logic_vector(2 downto 0) := "01";
+    constant C_SAMPLE_TEMP     : std_logic_vector(2 downto 0) := "10";
+    constant C_SAMPLE_HUMIDITY : std_logic_vector(2 downto 0) := "11";
 
 begin
 
