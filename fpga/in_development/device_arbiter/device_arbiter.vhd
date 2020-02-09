@@ -19,15 +19,16 @@ entity DEVICE_ARBITER is
     I_HUMIDITY_ID : in std_logic; -- ID 3 (BOTTOM PB)
     I_DATA_LOG_EN : in std_logic;
 
-    O_DEVICE_ID   : out std_logic_vector(1 downto 0));
+    O_DEVICE_ID   : out std_logic_vector(2 downto 0));
 end DEVICE_ARBITER;
 
 architecture BEHAVIORAL of DEVICE_ARBITER is
 
-    constant C_SAMPLE_VOLTAGE  : std_logic_vector(2 downto 0) := "00";
-    constant C_SAMPLE_CURRENT  : std_logic_vector(2 downto 0) := "01";
-    constant C_SAMPLE_TEMP     : std_logic_vector(2 downto 0) := "10";
-    constant C_SAMPLE_HUMIDITY : std_logic_vector(2 downto 0) := "11";
+    constant C_SAMPLE_VOLTAGE  : std_logic_vector(2 downto 0) := "000";
+    constant C_SAMPLE_CURRENT  : std_logic_vector(2 downto 0) := "001";
+    constant C_SAMPLE_TEMP     : std_logic_vector(2 downto 0) := "010";
+    constant C_SAMPLE_HUMIDITY : std_logic_vector(2 downto 0) := "011";
+    constant C_LOG_DATA        : std_logic_vector(2 downto 0) := "100";
 
 begin
 
@@ -38,7 +39,7 @@ begin
     Arbiter : process(I_CLK) begin
         if rising_edge(I_CLK) then
             if I_RST = '1' then
-                O_DEVICE_ID <= (others => '1'); -- Unrecognized DEVICE ID
+                O_DEVICE_ID <= (others => 'U'); -- Unrecognized DEVICE ID
             else
                 if I_DATA_LOG_EN = '1' then
                     O_DEVICE_ID <= C_LOG_DATA;
@@ -51,7 +52,7 @@ begin
                 elsif I_HUMIDITY_ID = '1' then
                     O_DEVICE_ID <= C_SAMPLE_HUMIDITY;
                 else
-                    O_DEVICE_ID <= (others => '1'); -- Unrecognized DEVICE ID
+                    O_DEVICE_ID <= (others => 'U'); -- Unrecognized DEVICE ID
                 end if;
             end if;
         end if;
