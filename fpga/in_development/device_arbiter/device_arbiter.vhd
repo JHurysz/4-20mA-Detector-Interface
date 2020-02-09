@@ -51,8 +51,6 @@ begin
                     O_DEVICE_ID <= C_SAMPLE_TEMP;
                 elsif I_HUMIDITY_ID = '1' then
                     O_DEVICE_ID <= C_SAMPLE_HUMIDITY;
-                else
-                    O_DEVICE_ID <= (others => 'U'); -- Unrecognized DEVICE ID
                 end if;
             end if;
         end if;
