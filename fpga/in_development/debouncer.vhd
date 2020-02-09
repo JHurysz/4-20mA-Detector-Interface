@@ -8,15 +8,15 @@ library ieee;
 use     ieee.std_logic_1164.all;
 use     ieee.numeric_std.all;
 
-entity DEBOUNCER_1_0 is
+entity DEBOUNCER is
     generic(G_REG_WIDTH : integer := 16); 
 	 Port ( 
 		I_CLK              : in   std_logic;
 		I_BUTTON_IN        : in   std_logic;
 		O_BUTTON_DEBOUNCED : out  std_logic);
-end DEBOUNCER_1_0;
+end DEBOUNCER;
 
-architecture BEHAVIORAL of DEBOUNCER_1_0 is
+architecture BEHAVIORAL of DEBOUNCER is
 
 	signal   bounce_cntr : std_logic_vector(G_REG_WIDTH - 1 downto 0);
 	constant C_ZEROS     : std_logic_vector(G_REG_WIDTH - 1 downto 0) := (others => '0');
