@@ -87,6 +87,7 @@ begin
             I_CURRENT_ID  => current_discrete,
             I_TEMP_ID     => temp_discrete,
             I_HUMIDITY_ID => humidity_discrete,
+            I_DATA_LOG_EN => '0', -- not using
 
             O_DEVICE_ID   => device_id);
 
@@ -97,13 +98,13 @@ begin
         -- Defaults
         O_LEDS <= (others => '0');
 
-        case LED_Logic is
+        case device_id is
             when "000"  => O_LEDS <= ("0001");
             when "001"  => O_LEDS <= ("0010");
             when "010"  => O_LEDS <= ("0100");
             when "011"  => O_LEDS <= ("1000");
             when "100"  => O_LEDS <= ("1001"); -- Should not occur as Data logging never gets toggled.is
-            when others => O_LEDS <= (others => '1') -- Error if this occurs.
+            when others => O_LEDS <= (others => '1'); -- Error if this occurs.
         end case;
     end process LED_Logic;
 
