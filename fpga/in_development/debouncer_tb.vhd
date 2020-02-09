@@ -30,6 +30,8 @@ architecture BEHAVIORAL of DEBOUNCER_TB is
     -- Clock period definitions
     constant C_CLK_PERIOD : time := 31.25 ns;
 
+begin
+
     -- Clock Generation
     I_CLK <= not I_CLK after C_CLK_PERIOD/2;
 
