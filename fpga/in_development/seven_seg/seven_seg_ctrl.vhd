@@ -10,7 +10,7 @@ use     ieee.numeric_std.all;
 
 entity SEVEN_SEG_CTRL is
     Port ( 
-           I_CLK           : in   STD_LOGIC 
+           I_CLK           : in   STD_LOGIC;
            -- I_RST           : in   STD_LOGIC;
 
            I_HEX_DATA_IN_0 : in   STD_LOGIC_VECTOR (3 downto 0);

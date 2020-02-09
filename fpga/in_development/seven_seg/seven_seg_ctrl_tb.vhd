@@ -83,13 +83,13 @@ begin
           O_DP            => O_DP);
 
    -- Clock process definitions
-   I_CLK : process
+   I_CLK_Process : process
    begin
 		I_CLK <= '0';
 		wait for C_CLK_PERIOD/2;
 		I_CLK <= '1';
 		wait for C_CLK_PERIOD/2;
-   end process I_CLK;
+   end process I_CLK_Process;
  
 
    -- Stimulus process
