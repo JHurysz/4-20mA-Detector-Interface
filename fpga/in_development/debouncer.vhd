@@ -18,7 +18,7 @@ end DEBOUNCER_1_0;
 
 architecture BEHAVIORAL of DEBOUNCER_1_0 is
 
-	signal   bounce_cntr : std_logic_vector(G_REG_WIDTH-1 downto 0);
+	signal   bounce_cntr : std_logic_vector(G_REG_WIDTH - 1 downto 0);
 	constant C_ZEROS     : std_logic_vector(G_REG_WIDTH - 1 downto 0) := (others => '0');
 
 begin
