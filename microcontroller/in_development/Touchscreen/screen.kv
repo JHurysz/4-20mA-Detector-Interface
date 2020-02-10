@@ -1,0 +1,93 @@
+<ScreenMain>:
+    d_humidity: humidity
+    d_temperature: temperature
+    d_voltage: voltage
+    d_current: current
+
+    ScreenBluetooth:
+        x: root.right - self.width - 5
+        y: root.top - self.height - 5
+        
+    ScreenLogging:
+        x: root.right - (self.width + 5) * 2
+        y: root.top - self.height - 5
+     
+    ScreenHum:
+        id: humidity    
+    Label:
+        center_y: (root.height - 25) * 3/4
+        center_x: root.width * 1/4
+        font_size: 50
+        text: str(root.d_humidity.hum)
+    Label:
+        font_size: 20
+        center_x: root.width * 1/4
+        top: (root.height - 25) * 3/4
+        text: "Humidity"
+    
+    ScreenTemp:
+        id: temperature    
+    Label:
+        center_y: (root.height - 25) * 3/4
+        center_x: root.width * 3/4
+        font_size: 50
+        text: str(root.d_temperature.temp)
+    Label:
+        font_size: 20
+        center_x: root.width * 3/4
+        top: (root.height - 25) * 3/4
+        text: "Temperature"
+     
+    ScreenVolt:
+        id: voltage    
+    Label:
+        center_y: (root.height - 25) * 1/4
+        center_x: root.width * 1/4
+        font_size: 50
+        text: str(root.d_voltage.volt)
+    Label:
+        font_size: 20
+        center_x: root.width * 1/4
+        top: (root.height - 25) * 1/4
+        text: "Voltage"
+    
+    ScreenCurr:
+        id: current   
+    Label:
+        center_y: (root.height - 25) * 1/4
+        center_x: root.width * 3/4
+        font_size: 50
+        text: str(root.d_voltage.volt)
+    Label:
+        font_size: 20
+        center_x: root.width * 3/4
+        top: (root.height - 25) * 1/4
+        text: "Current"
+
+<ScreenBluetooth>:
+    size: 50, 50
+    canvas:
+        Color:
+            rgb: 0, 0, 255
+        Rectangle:
+            pos: self.pos
+            size: self.size
+        
+<ScreenLogging>:
+    size: 50, 50
+    canvas:
+        Color:
+            rgb: 255, 0, 0
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<ScreenDiagnostic>:
+
+<ScreenTemp>:
+
+<ScreenHum>:
+    
+<ScreenVolt>:
+
+<ScreenCurr>:
