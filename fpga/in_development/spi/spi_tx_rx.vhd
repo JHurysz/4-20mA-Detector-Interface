@@ -27,6 +27,7 @@ entity SPI_TX_RX is
       I_LD_DATA_REG          : in std_logic;
       I_LD_DATA_OUT          : in std_logic;
       O_ALL_BYTES_TRANSFERRED: out std_logic;
+      O_START_OF_TRANSFER    : out std_logic;
 
       O_VOLTAGE_REG          : out std_logic_vector(15 downto 0);
       O_CURRENT_REG          : out std_logic_vector(15 downto 0);
