@@ -17,12 +17,15 @@ entity SPI_CTRL is
         -- Control Signals
         I_ALL_BITS_TRANSFERRED : in  std_logic;
         I_START_OF_TRANSFER    : in  std_logic;
+		I_END_CS_DELAY         : in  std_logic;
         O_CLR_SPI_COUNT        : out std_logic;
         O_LD_SPI_COUNT         : out std_logic;
         O_SHIFT_CONFIG_REG     : out std_logic;
         O_LD_CONFIG_REG        : out std_logic;
         O_LD_DATA_REG          : out std_logic;
         O_LD_DATA_OUT          : out std_logic;
+		O_LD_CS_DELAY_PIPE     : out std_logic;
+		O_SHIFT_CS_DELAY_PIPE  : out std_logic;
 
         -- Physical Data Lines
         O_SCLK      : out std_logic;
@@ -34,13 +37,20 @@ end SPI_CTRL;
 
 architecture BEHAVIORAL of SPI_CTRL is
 
+	 
+	 --
+	 Constant C_CSSC_SCCS_CYCLES : positive := 4;
+	 
     -- Sampling Signals
-    signal start_sample : std_logic
-    signal sample_ctr   : std_logic_vector(9 downto 0) -- counts ticks b/w sample edges (10-bits is a guess)
+    signal start_sample : std_logic;
+    signal sample_ctr   : std_logic_vector(8 downto 0) := (others => '0'); -- counts ticks b/w sample edges (10-bits is a guess)
     signal internal_clk : std_logic;
+	 
+	 -- Othter Signals
+	 signal config_flash : std_logic := '0';
 
     -- FSM Type(s)
-    type T_SPI_COUNT is (S_CLEAR, S_DELAY, S_COUNT);
+    type T_SPI_COUNT is (S_CLEAR, S_WAIT_CSSC, S_DELAY, S_COUNT, S_WAIT_SCCS);
     signal spi_count, spi_count_next : T_SPI_COUNT := S_CLEAR;
 
     type T_SPI_DATA_MISO is (S_LOAD_MISO, S_SHIFT_MISO, S_WAIT_MISO);
@@ -63,7 +73,7 @@ begin
     end process Sample_Counter;
 
     -- sample starts after 1024 cycles
-    start_sample <= '1' when (sample_ctr = (others => '1')) else '0';
+    start_sample <= '1' when (sample_ctr(8 downto 0) = ("111111111")) else '0';
 
     State_Process : process(I_CLK) begin
         if rising_edge(I_CLK) then
@@ -80,24 +90,47 @@ begin
     end process State_Process;
 
     -- Count Control Transition Logic
-    SPI_Count_Transition : process(spi_count, start_sample, I_ALL_BITS_TRANSFERRED) begin -- remember to add to sensitivity list
-        case spi_count is
+    SPI_Count_Transition : process(spi_count, start_sample, I_ALL_BITS_TRANSFERRED,I_END_CS_DELAY) begin -- remember to add to sensitivity list
+        
+		  -- Defaults
+		  O_LD_CS_DELAY_PIPE <= '0';
+		  
+		  case spi_count is
             when S_CLEAR =>
                 if start_sample = '1' then
-                    spi_count_next <= S_DELAY;
+                    spi_count_next <= S_WAIT_CSSC;
+					O_LD_CS_DELAY_PIPE <= '1';
                 else
                     spi_count_next <= S_CLEAR;
                 end if;
+					 
+				when S_WAIT_CSSC =>
+				
+					if I_END_CS_DELAY = '1' then
+						spi_count_next <= S_DELAY;
+						O_LD_CS_DELAY_PIPE <= '1';
+					else
+						spi_count_next <= S_WAIT_CSSC;
+					end if;
+					
 
             when S_DELAY =>
                     if I_ALL_BITS_TRANSFERRED = '1' then
-                        spi_count_next <= S_CLEAR;
+                        spi_count_next <= S_WAIT_SCCS;
                     else
                         spi_count_next <= S_COUNT;
                     end if;
 
             when S_COUNT =>
                     spi_count_next <= S_DELAY;
+						  
+				when S_WAIT_SCCS =>
+					
+					if I_END_CS_DELAY = '1' then
+						spi_count_next <= S_CLEAR;
+					else
+						spi_count_next <= S_WAIT_SCCS;
+					end if;
 
             when others =>
                     spi_count_next <= S_CLEAR;
@@ -106,10 +139,10 @@ begin
     end process SPI_Count_Transition;
 
     -- MISO Control Transition Logic
-    MISO_Transition : process(spi_data_miso, temp_miso_val, I_ALL_BITS_TRANSFERRED) begin -- remember to add to sensitivity list
+    MISO_Transition : process(spi_data_miso, start_sample, I_ALL_BITS_TRANSFERRED) begin -- remember to add to sensitivity list
         case spi_data_miso is
             when S_LOAD_MISO  =>
-                if (temp_miso_val = '1') then
+                if (start_sample = '1') then
                     spi_data_miso_next <= S_WAIT_MISO;
                 else
                     spi_data_miso_next <= S_LOAD_MISO;
@@ -131,7 +164,7 @@ begin
     end process MISO_Transition;
 
     -- MOSI Control Transition Logic
-    MOSI_Transition : process(spi_data_mosi, config_flash, I_START_OF_TRANSFER, internal_clk, all_bits_sent) begin -- remember to add to sensitivity list
+    MOSI_Transition : process(spi_data_mosi, config_flash, I_START_OF_TRANSFER, internal_clk, I_ALL_BITS_TRANSFERRED) begin -- remember to add to sensitivity list
         case spi_data_mosi is
             when S_LOAD_MOSI  =>
                 if (config_flash = '1' and I_START_OF_TRANSFER = '1' and internal_clk = '0') then
@@ -144,7 +177,7 @@ begin
                 spi_data_mosi_next <= S_WAIT_MOSI;
 
             when S_WAIT_MOSI  =>
-                if all_bits_sent = '1' then
+                if I_ALL_BITS_TRANSFERRED = '1' then
                     spi_data_mosi_next <= S_LOAD_MOSI;
                 else 
                     spi_data_mosi_next <= S_SHIFT_MOSI;
@@ -192,13 +225,14 @@ begin
     end process Chip_Select_Arbiter;
 
     -- Serial Clock Generation
-    O_SCLK             <= '1' when (spi_count = S_CLEAR or spi_count = S_DELAY) else '0';
-    internal_clk       <= '1' when (spi_count = S_CLEAR or spi_count = S_DELAY) else '0';
+    O_SCLK             <= '1' when (spi_count = S_DELAY) else '0';
+    internal_clk       <= '1' when (spi_count = S_DELAY) else '0';
     O_CLR_SPI_COUNT    <= '1' when (spi_count = S_CLEAR)                        else '0';
     O_LD_SPI_COUNT     <= '1' when (spi_count = S_COUNT)                        else '0';
     O_SHIFT_CONFIG_REG <= '1' when (spi_data_mosi = S_SHIFT_MOSI)               else '0';
     O_LD_CONFIG_REG    <= '1' when (spi_data_mosi = S_LOAD_MOSI)                else '0';
     O_LD_DATA_OUT      <= '1' when (spi_data_miso = S_LOAD_MISO)                else '0';
-    O_LD_DATA_REG      <= '1' when (spi_data_miso = S_SHIFT_MISO)               else '0';
+    O_LD_DATA_REG      <= '1' when ((spi_data_miso = S_SHIFT_MISO) and (I_ALL_BITS_TRANSFERRED = '0'))              else '0';
+	O_SHIFT_CS_DELAY_PIPE <= '1' when ((spi_count = S_WAIT_CSSC) or (spi_count = S_WAIT_SCCS)) else '0';
 
 end BEHAVIORAL;

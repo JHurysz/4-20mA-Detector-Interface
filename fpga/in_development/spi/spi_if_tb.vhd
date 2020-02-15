@@ -33,7 +33,6 @@ architecture BEHAVIORAL of SPI_IF_TB is
 			  O_CURRENT_REG          : out std_logic_vector(15 downto 0);
 			  O_TEMP_REG             : out std_logic_vector(15 downto 0);
 			  O_HUMIDITY_REG         : out std_logic_vector(15 downto 0));
-			);
  	end COMPONENT;
 
    -- Inputs
@@ -58,13 +57,9 @@ architecture BEHAVIORAL of SPI_IF_TB is
 
 	-- Clock period definitions
    constant C_CLK_PERIOD : time := 31.25 ns;
- 
-	-- Test Data
-	type test_vector is record
-		ADC_data : std_logic_vector(15 downto 0);
-	end record;
 
-	type test_data_array is array (natural range <>) of test_vector;
+
+	type test_data_array is array (natural range <>) of std_logic_vector(15 downto 0);
 	constant C_TEST_DATA : test_data_array := ((x"AA5D"),
 											  ( x"BF0B"),
 											  ( x"C823"));
@@ -131,7 +126,7 @@ BEGIN
 		
 		-- for each test vector, generate the signals and timing for the ADC SPI
 		for k in C_TEST_DATA'range loop     
-			Generate_Data(C_TEST_DATA(k).ADC_data);
+			Generate_Data(C_TEST_DATA(k));
 		end loop;
 		
       wait;

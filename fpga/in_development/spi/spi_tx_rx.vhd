@@ -26,20 +26,22 @@ entity SPI_TX_RX is
       I_LD_CONFIG_REG        : in std_logic;
       I_LD_DATA_REG          : in std_logic;
       I_LD_DATA_OUT          : in std_logic;
+		I_LD_CS_DELAY_PIPE     : in std_logic;
+		I_SHIFT_CS_DELAY_PIPE  : in std_logic;
       O_ALL_BYTES_TRANSFERRED: out std_logic;
       O_START_OF_TRANSFER    : out std_logic;
+		O_END_CS_DELAY         : out std_logic;
 
       O_VOLTAGE_REG          : out std_logic_vector(15 downto 0);
       O_CURRENT_REG          : out std_logic_vector(15 downto 0);
       O_TEMP_REG             : out std_logic_vector(15 downto 0);
-      O_HUMIDITY_REG         : out std_logic_vector(15 downto 0);
-      
-    );
+      O_HUMIDITY_REG         : out std_logic_vector(15 downto 0));
 end SPI_TX_RX;
 
 architecture BEHAVIORAL of SPI_TX_RX is 
 
-    constant C_CONFIG_WORDS : std_logic_vector(15 downto 0) := WORDS;
+    constant C_CONFIG_WORDS : std_logic_vector(15 downto 0) := x"0000";
+	Constant C_CSSC_SCCS_CYCLES : positive := 4;
 
     signal spi_bit_count : std_logic_vector( 4 downto 0);
     signal config_reg    : std_logic_vector(16 downto 0); -- just a guess on size
@@ -48,29 +50,45 @@ architecture BEHAVIORAL of SPI_TX_RX is
     signal tmp_current_reg : std_logic_vector(15 downto 0) := (others => '0');
     signal tmp_temp_reg : std_logic_vector(15 downto 0) := (others => '0');
     signal tmp_humidity_reg : std_logic_vector(15 downto 0) := (others => '0');
+	signal cs_delay_pipe: std_logic_vector(C_CSSC_SCCS_CYCLES-1 downto 0) := ((C_CSSC_SCCS_CYCLES-1 downto 1 => '0') & '1');
+	 
 begin
 
     -- 5 Bit SPI Counter --
     SPI_Count : process(I_CLK) begin
         if rising_edge(I_CLK) then
             if I_CLR_SPI_COUNT = '1' then
-                spi_bit_count <= (others <= '0');
+                spi_bit_count <= (others => '0');
             elsif I_LD_SPI_COUNT = '1' then
                 spi_bit_count <= std_logic_vector(unsigned(spi_bit_count) + 1);
             end if;
         end if;
     end process SPI_Count;
+	 
+	 -- CS Delay Pipeline
+	 CS_Delay : process(I_CLK) begin
+		if rising_edge(I_CLK) then
+			if I_LD_CS_DELAY_PIPE = '1' then
+				cs_delay_pipe <= ((C_CSSC_SCCS_CYCLES-1 downto 1 => '0') & '1');
+			elsif I_SHIFT_CS_DELAY_PIPE = '1' then
+				cs_delay_pipe <= cs_delay_pipe(C_CSSC_SCCS_CYCLES-2 downto 0) & '0';
+			else
+				cs_delay_pipe <= cs_delay_pipe;
+			end if;
+		end if;
+	 end process CS_Delay;
 
     -- Bytes per transfer
     O_ALL_BYTES_TRANSFERRED <= '1' when (unsigned(spi_bit_count) = 16) else '0';
     -- Maybe need another compare (how many bits are in config register?)
     O_START_OF_TRANSFER     <= '1' when (unsigned(spi_bit_count)  = 1) else '0';
+	O_END_CS_DELAY          <= '1' when (cs_delay_pipe(C_CSSC_SCCS_CYCLES-1) = '1') else '0';
     
     -- Configuration Register
     Configuration_Shift_Register : process(I_CLK) begin
         if rising_edge(I_CLK) then
             if I_LD_CONFIG_REG = '1' then
-                config_reg <= '0' and C_CONFIG_WORDS;
+                config_reg <= '0' & C_CONFIG_WORDS;
             elsif I_SHIFT_CONFIG_REG = '1' then
                 config_reg <= config_reg(15 downto 0) & '0';
             else
@@ -93,32 +111,34 @@ begin
     -- Data out Register -- 
     Output_Shift_Register : process(I_CLK) begin
         if rising_edge(I_CLK) then
+			if I_LD_DATA_OUT = '1' then
 
-            -- Defaults
-            tmp_voltage_reg  <= tmp_voltage_reg;
-            tmp_current_reg  <= tmp_current_reg;
-            tmp_temp_reg     <= tmp_temp_reg;
-            tmp_humidity_reg <= tmp_humidity_reg;
+					-- Defaults
+					tmp_voltage_reg  <= tmp_voltage_reg;
+					tmp_current_reg  <= tmp_current_reg;
+					tmp_temp_reg     <= tmp_temp_reg;
+					tmp_humidity_reg <= tmp_humidity_reg;
 
-            case I_DEVICE_ID is
-                when "00" => -- Voltage
-                    tmp_voltage_reg  <= data_reg;
+					case I_DEVICE_ID is
+						 when "00" => -- Voltage
+							  tmp_voltage_reg  <= data_reg;
 
-                when "01" => -- Current
-                    tmp_current_reg  <= data_reg;
+						 when "01" => -- Current
+							  tmp_current_reg  <= data_reg;
 
-                when "10" => -- Temp
-                    tmp_temp_reg     <= data_reg;
+						 when "10" => -- Temp
+							  tmp_temp_reg     <= data_reg;
 
-                when "11" => -- Humidity
-                    tmp_humidity_reg <= data_reg
+						 when "11" => -- Humidity
+							  tmp_humidity_reg <= data_reg;
 
-                when others => -- Shouldn't Happen
-                    tmp_voltage_reg <= tmp_voltage_reg;
-                    tmp_current_reg <= tmp_current_reg;
-                    tmp_temp_reg    <= tmp_temp_reg;
-                    tmp_humidity_reg<= tmp_humidity_reg;
-            end case;
+						 when others => -- Shouldn't Happen
+							  tmp_voltage_reg <= tmp_voltage_reg;
+							  tmp_current_reg <= tmp_current_reg;
+							  tmp_temp_reg    <= tmp_temp_reg;
+							  tmp_humidity_reg<= tmp_humidity_reg;
+					end case;
+				end if;
         end if;    
     end process Output_Shift_Register;
 

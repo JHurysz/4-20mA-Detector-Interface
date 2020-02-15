@@ -44,12 +44,15 @@ architecture BEHAVIORAL of SPI_IF is
         -- Control Signals
         I_ALL_BITS_TRANSFERRED : in  std_logic;
         I_START_OF_TRANSFER    : in  std_logic;
+		I_END_CS_DELAY         : in  std_logic;
         O_CLR_SPI_COUNT        : out std_logic;
         O_LD_SPI_COUNT         : out std_logic;
         O_SHIFT_CONFIG_REG     : out std_logic;
         O_LD_CONFIG_REG        : out std_logic;
         O_LD_DATA_REG          : out std_logic;
         O_LD_DATA_OUT          : out std_logic;
+		O_LD_CS_DELAY_PIPE     : out std_logic;
+		O_SHIFT_CS_DELAY_PIPE  : out std_logic;
 
         -- Physical Data Lines
         O_SCLK      : out std_logic;
@@ -77,8 +80,11 @@ architecture BEHAVIORAL of SPI_IF is
         I_LD_CONFIG_REG        : in std_logic;
         I_LD_DATA_REG          : in std_logic;
         I_LD_DATA_OUT          : in std_logic;
+		I_LD_CS_DELAY_PIPE     : in std_logic;
+		I_SHIFT_CS_DELAY_PIPE  : in std_logic;
         O_ALL_BYTES_TRANSFERRED: out std_logic;
         O_START_OF_TRANSFER    : out std_logic;
+		O_END_CS_DELAY         : out std_logic;
   
         O_VOLTAGE_REG          : out std_logic_vector(15 downto 0);
         O_CURRENT_REG          : out std_logic_vector(15 downto 0);
@@ -95,6 +101,9 @@ architecture BEHAVIORAL of SPI_IF is
     signal ld_config_reg        : std_logic;
     signal ld_data_reg          : std_logic;
     signal ld_data_out          : std_logic;
+	signal ld_cs_delay_pipe     : std_logic;
+	signal shift_cs_delay_pipe  : std_logic;
+	signal end_cs_delay         : std_logic;
 
 begin
 
@@ -107,13 +116,16 @@ begin
 
         -- Control Signals
         I_ALL_BITS_TRANSFERRED      => all_bits_transferred,
-        I_START_OF_TRANSFER         => start_of_transfer,    
+        I_START_OF_TRANSFER         => start_of_transfer, 
+		I_END_CS_DELAY              => end_cs_delay,
         O_CLR_SPI_COUNT             => clr_spi_cnt,        
         O_LD_SPI_COUNT              => ld_spi_cnt,         
         O_SHIFT_CONFIG_REG          => shift_config_reg,     
         O_LD_CONFIG_REG             => ld_config_reg,        
         O_LD_DATA_REG               => ld_data_reg,          
-        O_LD_DATA_OUT               => ld_data_out,          
+        O_LD_DATA_OUT               => ld_data_out,        
+		O_LD_CS_DELAY_PIPE          => ld_cs_delay_pipe,
+		O_SHIFT_CS_DELAY_PIPE       => shift_cs_delay_pipe,
 
         -- Physical Data Lines
         O_SCLK                      => O_SCLK,
@@ -141,8 +153,11 @@ begin
         I_LD_CONFIG_REG            => ld_config_reg,     
         I_LD_DATA_REG              => ld_data_reg,
         I_LD_DATA_OUT              => ld_data_out,
+		I_LD_CS_DELAY_PIPE         => ld_cs_delay_pipe,
+		I_SHIFT_CS_DELAY_PIPE      => shift_cs_delay_pipe,
         O_ALL_BYTES_TRANSFERRED    => all_bits_transferred,
         O_START_OF_TRANSFER        => start_of_transfer,
+		O_END_CS_DELAY             => end_cs_delay,
   
         O_VOLTAGE_REG              => O_VOLTAGE_REG,
         O_CURRENT_REG              => O_CURRENT_REG,
