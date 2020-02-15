@@ -3,6 +3,7 @@
 -- Company:   Binghamton University           --
 -- Author(s): Joe Hurysz, Carl Betcher        --
 ------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;
  
@@ -14,111 +15,114 @@ architecture BEHAVIORAL of SPI_IF_TB is
     -- Component Declaration for the Unit Under Test (UUT)
 	 COMPONENT SPI_IF
 	 PORT(
-			  Osc_Clk : in STD_LOGIC;
-			  Switch : in  STD_LOGIC_VECTOR (7 downto 5);
-			  LED : out  STD_LOGIC_VECTOR (7 downto 0);
-			  Seg7_SEG : out STD_LOGIC_VECTOR (6 downto 0); 
-			  Seg7_DP  : out STD_LOGIC; 
-			  Seg7_AN  : out STD_LOGIC_VECTOR (4 downto 0);
-			  SPI_CS : out STD_LOGIC; 
-			  SPI_SCLK : out STD_LOGIC;
-			  SPI_MOSI : out STD_LOGIC; 
-			  SPI_MISO : in STD_LOGIC 
+			  I_CLK : in std_logic;
+			  I_RST : in std_logic;
+			  I_DEVICE_ID : in std_logic_vector(1 downto 0);
+			  
+			  -- Physical Lines
+			  I_MISO      : in  std_logic;
+			  O_SCLK      : out std_logic;
+			  O_MOSI      : out std_logic; 
+			  O_CS_0      : out std_logic;
+			  O_CS_1      : out std_logic;
+			  O_CS_2      : out std_logic;
+			  O_CS_3      : out std_logic;
+			  
+			  -- Register Values
+			  O_VOLTAGE_REG          : out std_logic_vector(15 downto 0);
+			  O_CURRENT_REG          : out std_logic_vector(15 downto 0);
+			  O_TEMP_REG             : out std_logic_vector(15 downto 0);
+			  O_HUMIDITY_REG         : out std_logic_vector(15 downto 0));
 			);
  	end COMPONENT;
 
-   --Inputs
-   signal Osc_Clk : std_logic := '0';
-   signal Switch : std_logic_vector(7 downto 5) := (others => '0');
- 	--Outputs
-   signal LED : std_logic_vector(7 downto 0);
-   signal Seg7_SEG : std_logic_vector(6 downto 0);
-   signal Seg7_DP : std_logic;
-   signal Seg7_AN : std_logic_vector(5 downto 1);
-   --ADC I/O
-	signal SPI_SCLK : std_logic;
-	signal SPI_MISO : std_logic := '0';
-	signal SPI_MOSI : std_logic := '0';
-	signal SPI_CS : std_logic;
+   -- Inputs
+   signal I_CLK : std_logic := '0';
+   signal I_RST : std_logic := '0';
+   signal I_DEVICE_ID : std_logic_vector(1 downto 0) := "00";
+  
+   -- ADC I/O
+   signal I_MISO : std_logic := '0';
+   signal O_MOSI : std_logic := '0';
+   signal O_SCLK : std_logic;
+   signal O_CS_0 : std_logic;
+   signal O_CS_1 : std_logic;
+   signal O_CS_2 : std_logic;
+   signal O_CS_3 : std_logic;
+
+   -- Outputs
+   signal O_VOLTAGE_REG    : std_logic_vector(15 downto 0);
+   signal O_CURRENT_REG    : std_logic_vector(15 downto 0);
+   signal O_TEMP_REG       : std_logic_vector(15 downto 0);
+   signal O_HUMIDITY_REG   : std_logic_vector(15 downto 0);
+
 	-- Clock period definitions
-   constant Osc_Clk_period : time := 31.25 ns;
+   constant C_CLK_PERIOD : time := 31.25 ns;
  
 	-- Test Data
 	type test_vector is record
-		Switch   : std_logic_vector(7 downto 5);
-		ADC_data : std_logic_vector(11 downto 0);
+		ADC_data : std_logic_vector(15 downto 0);
 	end record;
 
 	type test_data_array is array (natural range <>) of test_vector;
-	constant test_data : test_data_array :=
-		(
-			( "101", x"A5D" ),
-			( "011", x"F0B" ),
-			( "110", x"823" )
-		);
+	constant C_TEST_DATA : test_data_array := ((x"AA5D"),
+											  ( x"BF0B"),
+											  ( x"C823"));
 
 BEGIN
-	-- InstSeg7_ANtiate the Unit Under Test (UUT)
-   uut: TopLevel PORT MAP (
-          Osc_Clk => Osc_Clk,
-          Switch => Switch,
-          LED => LED,
-          Seg7_SEG => Seg7_SEG,
-          Seg7_DP => Seg7_DP,
-          Seg7_AN => Seg7_AN,
-			 SPI_CS => SPI_CS,
-			 SPI_SCLK => SPI_SCLK,
-			 SPI_MOSI => SPI_MOSI,
-			 SPI_MISO => SPI_MISO
-        );
+	-- Instantiate the UUT
+   UUT : SPI_IF 
+   port map (
+	   I_CLK              => I_CLK, 
+	   I_RST              => I_RST, 
+	   I_DEVICE_ID        => I_DEVICE_ID, -- Should always latch to voltage reg
+	   
+	   -- Physical Lines
+	   I_MISO             => I_MISO,
+	   O_SCLK             => O_SCLK,
+	   O_MOSI             => O_MOSI,
+	   O_CS_0             => O_CS_0,
+	   O_CS_1             => O_CS_1,
+	   O_CS_2             => O_CS_2,
+	   O_CS_3             => O_CS_3,
+	   
+	   -- Register Values
+	   O_VOLTAGE_REG      => O_VOLTAGE_REG,
+	   O_CURRENT_REG      => O_CURRENT_REG,
+	   O_TEMP_REG         => O_TEMP_REG,
+	   O_HUMIDITY_REG     => O_HUMIDITY_REG);
 
    -- Clock process definitions
-   Osc_Clk_process :process
-   begin
-		Osc_Clk <= '0';
-		wait for Osc_Clk_period/2;
-		Osc_Clk <= '1';
-		wait for Osc_Clk_period/2;
-   end process;
+   I_CLK <= not I_CLK after C_CLK_PERIOD/2;
  
    -- Stimulus process
-   stim_proc: process
+   Stimulus : process
 	
 	-- Procedure to generate serial data stream from ADC for one sample
-	procedure Gen_ADC_data (data : in std_logic_vector(11 downto 0)) is
+	procedure Generate_Data (data : in std_logic_vector(15 downto 0)) is
 	begin
 		-- Wait for ADC_CS falling edge
-		wait until falling_edge(SPI_CS);
+		wait until falling_edge(O_CS_0);
 		
 		-- Set ADC data to zero
-		SPI_MISO <= '0';
+		I_MISO <= '0';
 		
-		-- Output 4 consecutive zeros on SPI_MISO
-		-- Sync'd to falling edge of SPI_SCLK
-		for i in 1 to 4 loop
-			exit when SPI_CS = '1';  -- check that CS stays low
-			wait until falling_edge(SPI_SCLK);
-			exit when SPI_CS = '1';  -- check that CS stays low
-			wait until rising_edge(SPI_SCLK);
-			exit when SPI_CS = '1';  -- check that CS stays low
-		end loop;
-		
-		-- Output 12 consecutive bits of an ADC sample on SPI_MISO
-		-- Sync'd to falling edge of SPI_SCLK
-		for i in 11 downto 0 loop
-			exit when SPI_CS = '1';  -- check that CS stays low
-			wait until falling_edge(SPI_SCLK);
-			exit when SPI_CS = '1';  -- check that CS stays low
+		-- Output 16 consecutive bits of an ADC sample on I_MISO
+		-- Sync'd to falling edge of O_SCLK
+		for i in 15 downto 0 loop
+			exit when O_CS_0 = '1';  -- check that CS stays low
+			wait until falling_edge(O_SCLK);
+			exit when O_CS_0 = '1';  -- check that CS stays low
 			wait for 17 ns;  -- tDACC = 17 ns typical, 27 ns max.
-			SPI_MISO <= data(i);
-			exit when SPI_CS = '1';  -- check that CS stays low
-			wait until rising_edge(SPI_SCLK);
-			exit when SPI_CS = '1';  -- check that CS stays low
+			I_MISO <= data(i);
+			exit when O_CS_0 = '1';  -- check that CS stays low
+			wait until rising_edge(O_SCLK);
+			exit when O_CS_0 = '1';  -- check that CS stays low
 		end loop;
 		
 		-- set ADC data to zero
-		wait until rising_edge(SPI_CS);
-		SPI_MISO <= '0';
+		wait until rising_edge(O_CS_0);
+		I_MISO <= '0';
 	end procedure;
 	
    begin		
@@ -126,9 +130,8 @@ BEGIN
       -- insert stimulus here
 		
 		-- for each test vector, generate the signals and timing for the ADC SPI
-		for k in test_data'range loop
-			Switch <= test_data(k).Switch;        
-			Gen_ADC_data(test_data(k).ADC_data);
+		for k in C_TEST_DATA'range loop     
+			Generate_Data(C_TEST_DATA(k).ADC_data);
 		end loop;
 		
       wait;

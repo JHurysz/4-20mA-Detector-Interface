@@ -23,7 +23,7 @@ entity SPI_IF is
         O_CS_0      : out std_logic;
         O_CS_1      : out std_logic;
         O_CS_2      : out std_logic;
-        O_CS_3      : out std_logic
+        O_CS_3      : out std_logic;
         
         -- Register Values
         O_VOLTAGE_REG          : out std_logic_vector(15 downto 0);
