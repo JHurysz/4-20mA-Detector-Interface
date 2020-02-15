@@ -104,13 +104,13 @@ begin
                 when "00" => -- Voltage
                     tmp_voltage_reg  <= data_reg;
 
-                when "00" => -- Current
+                when "01" => -- Current
                     tmp_current_reg  <= data_reg;
 
-                when "00" => -- Temp
+                when "10" => -- Temp
                     tmp_temp_reg     <= data_reg;
 
-                when "00" => -- Humidity
+                when "11" => -- Humidity
                     tmp_humidity_reg <= data_reg
 
                 when others => -- Shouldn't Happen
