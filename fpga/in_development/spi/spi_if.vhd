@@ -10,26 +10,31 @@ use     ieee.numeric_std.all;
 
 entity SPI_IF is
     port (
-        I_CLK       : in std_logic;
-        I_RST       : in std_logic;
-        I_DEVICE_ID : in std_logic_vector(1 downto 0);
+        I_CLK                       : in  std_logic;
+        I_RST                       : in  std_logic;
+        I_DEVICE_ID                 : in  std_logic_vector(1 downto 0);
 
 
 
         -- Physical Data Lines
-        I_MISO      : in  std_logic;
-        O_MOSI      : out std_logic;
-        O_SCLK      : out std_logic;
-        O_CS_0      : out std_logic;
-        O_CS_1      : out std_logic;
-        O_CS_2      : out std_logic;
-        O_CS_3      : out std_logic;
+        I_MISO                      : in  std_logic;
+        O_MOSI                      : out std_logic;
+        O_SCLK                      : out std_logic;
+        O_CS_0                      : out std_logic;
+        O_CS_1                      : out std_logic;
+        O_CS_2                      : out std_logic;
+        O_CS_3                      : out std_logic;
         
         -- Register Values
-        O_VOLTAGE_REG          : out std_logic_vector(15 downto 0);
-        O_CURRENT_REG          : out std_logic_vector(15 downto 0);
-        O_TEMP_REG             : out std_logic_vector(15 downto 0);
-        O_HUMIDITY_REG         : out std_logic_vector(15 downto 0));
+        O_VOLTAGE_REG               : out std_logic_vector(15 downto 0);
+        O_CURRENT_REG               : out std_logic_vector(15 downto 0);
+        O_TEMP_REG                  : out std_logic_vector(15 downto 0);
+        O_HUMIDITY_REG              : out std_logic_vector(15 downto 0);
+		  
+		O_VOLTAGE_READBACK          : out std_logic_vector(15 downto 0);
+        O_CURRENT_READBACK          : out std_logic_vector(15 downto 0);
+        O_TEMP_READBACK             : out std_logic_vector(15 downto 0);
+		O_HUMIDITY_READBACK         : out std_logic_vector(15 downto 0));
 end SPI_IF;
 
 architecture BEHAVIORAL of SPI_IF is
@@ -37,59 +42,67 @@ architecture BEHAVIORAL of SPI_IF is
     -- Component Declarations
     Component SPI_CTRL
     port(
-        I_CLK       : in std_logic;
-        I_RST       : in std_logic;
-        I_DEVICE_ID : in std_logic_vector(1 downto 0);
+        I_CLK                  : in std_logic;
+        I_RST                  : in std_logic;
+        I_DEVICE_ID            : in std_logic_vector(1 downto 0);
 
         -- Control Signals
         I_ALL_BITS_TRANSFERRED : in  std_logic;
         I_START_OF_TRANSFER    : in  std_logic;
-		I_END_CS_DELAY         : in  std_logic;
+		I_CONFIG_FLASH         : in  std_logic;
+		I_SPI_CNT_LT_16        : in  std_logic;
         O_CLR_SPI_COUNT        : out std_logic;
         O_LD_SPI_COUNT         : out std_logic;
         O_SHIFT_CONFIG_REG     : out std_logic;
         O_LD_CONFIG_REG        : out std_logic;
         O_LD_DATA_REG          : out std_logic;
         O_LD_DATA_OUT          : out std_logic;
-		O_LD_CS_DELAY_PIPE     : out std_logic;
-		O_SHIFT_CS_DELAY_PIPE  : out std_logic;
+		O_INTERNAL_CLK         : out std_logic;
+		O_LD_CONFIG_READBACK   : out std_logic;
+	    O_LD_READBACK_OUT      : out std_logic;
 
         -- Physical Data Lines
-        O_SCLK      : out std_logic;
-        O_CS_0      : out std_logic;
-        O_CS_1      : out std_logic;
-        O_CS_2      : out std_logic;
-        O_CS_3      : out std_logic);
+        O_SCLK                 : out std_logic;
+        O_CS_0                 : out std_logic;
+        O_CS_1                 : out std_logic;
+        O_CS_2                 : out std_logic;
+        O_CS_3                 : out std_logic);
     end Component SPI_CTRL;
 
     Component SPI_TX_RX
     port(
-        I_CLK   : in std_logic;
-        I_RST   : in std_logic;
-        I_DEVICE_ID : in std_logic_vector(1 downto 0);
+        I_CLK                       : in  std_logic;
+        I_RST                       : in  std_logic;
+        I_DEVICE_ID                 : in  std_logic_vector(1 downto 0);
   
   
         -- Data Lines
-        I_MISO  : in std_logic;
-        O_MOSI  : out std_logic;
+        I_MISO                      : in  std_logic;
+        O_MOSI                      : out std_logic;
   
         -- Control Signals
-        I_CLR_SPI_COUNT        : in std_logic;
-        I_LD_SPI_COUNT         : in std_logic;
-        I_SHIFT_CONFIG_REG     : in std_logic;
-        I_LD_CONFIG_REG        : in std_logic;
-        I_LD_DATA_REG          : in std_logic;
-        I_LD_DATA_OUT          : in std_logic;
-		I_LD_CS_DELAY_PIPE     : in std_logic;
-		I_SHIFT_CS_DELAY_PIPE  : in std_logic;
-        O_ALL_BYTES_TRANSFERRED: out std_logic;
-        O_START_OF_TRANSFER    : out std_logic;
-		O_END_CS_DELAY         : out std_logic;
+        I_CLR_SPI_COUNT             : in  std_logic;
+        I_LD_SPI_COUNT              : in  std_logic;
+		I_CONFIG_IN_PROCESS         : in  std_logic;
+		I_LD_CONFIG_READBACK        : in  std_logic;
+		I_LD_READBACK_OUT           : in  std_logic;
+        I_SHIFT_CONFIG_REG          : in  std_logic;
+        I_LD_CONFIG_REG             : in  std_logic;
+        I_LD_DATA_REG               : in  std_logic;
+        I_LD_DATA_OUT               : in  std_logic;
+        O_ALL_BYTES_TRANSFERRED     : out std_logic;
+        O_START_OF_TRANSFER         : out std_logic;
+		O_SPI_CNT_LT_16             : out std_logic;
   
-        O_VOLTAGE_REG          : out std_logic_vector(15 downto 0);
-        O_CURRENT_REG          : out std_logic_vector(15 downto 0);
-        O_TEMP_REG             : out std_logic_vector(15 downto 0);
-        O_HUMIDITY_REG         : out std_logic_vector(15 downto 0));
+        O_VOLTAGE_REG               : out std_logic_vector(15 downto 0);
+        O_CURRENT_REG               : out std_logic_vector(15 downto 0);
+        O_TEMP_REG                  : out std_logic_vector(15 downto 0);
+        O_HUMIDITY_REG              : out std_logic_vector(15 downto 0);
+		  
+		O_VOLTAGE_READBACK          : out std_logic_vector(15 downto 0);
+        O_CURRENT_READBACK          : out std_logic_vector(15 downto 0);
+        O_TEMP_READBACK             : out std_logic_vector(15 downto 0);
+		O_HUMIDITY_READBACK         : out std_logic_vector(15 downto 0));
     end Component SPI_TX_RX;
 
     -- Signal Declarations
@@ -101,9 +114,12 @@ architecture BEHAVIORAL of SPI_IF is
     signal ld_config_reg        : std_logic;
     signal ld_data_reg          : std_logic;
     signal ld_data_out          : std_logic;
-	signal ld_cs_delay_pipe     : std_logic;
-	signal shift_cs_delay_pipe  : std_logic;
-	signal end_cs_delay         : std_logic;
+	signal internal_clk         : std_logic;
+	signal config_flash         : std_logic := '1';
+	signal spi_cnt_lt_16        : std_logic;
+	signal ld_config_readback    : std_logic;
+	signal ld_readback_out      : std_logic;
+	 
 
 begin
 
@@ -116,16 +132,18 @@ begin
 
         -- Control Signals
         I_ALL_BITS_TRANSFERRED      => all_bits_transferred,
-        I_START_OF_TRANSFER         => start_of_transfer, 
-		I_END_CS_DELAY              => end_cs_delay,
+        I_START_OF_TRANSFER         => start_of_transfer,
+		I_CONFIG_FLASH              => config_flash,
+		I_SPI_CNT_LT_16             => spi_cnt_lt_16,
         O_CLR_SPI_COUNT             => clr_spi_cnt,        
         O_LD_SPI_COUNT              => ld_spi_cnt,         
         O_SHIFT_CONFIG_REG          => shift_config_reg,     
         O_LD_CONFIG_REG             => ld_config_reg,        
         O_LD_DATA_REG               => ld_data_reg,          
-        O_LD_DATA_OUT               => ld_data_out,        
-		O_LD_CS_DELAY_PIPE          => ld_cs_delay_pipe,
-		O_SHIFT_CS_DELAY_PIPE       => shift_cs_delay_pipe,
+        O_LD_DATA_OUT               => ld_data_out, 
+		O_INTERNAL_CLK              => internal_clk,
+		O_LD_CONFIG_READBACK        => ld_config_readback,
+		O_LD_READBACK_OUT           => ld_readback_out,
 
         -- Physical Data Lines
         O_SCLK                      => O_SCLK,
@@ -137,7 +155,7 @@ begin
 
     Instantiate_TX_RX : SPI_TX_RX
     port map(
-        I_CLK                      => I_CLK,
+        I_CLK                      => internal_clk,
         I_RST                      => I_RST,
         I_DEVICE_ID                => I_DEVICE_ID,
   
@@ -149,20 +167,26 @@ begin
         -- Control Signals
         I_CLR_SPI_COUNT            => clr_spi_cnt,
         I_LD_SPI_COUNT             => ld_spi_cnt,
+		I_CONFIG_IN_PROCESS        => config_flash,
+		I_LD_CONFIG_READBACK       => ld_config_readback,
+		I_LD_READBACK_OUT          => ld_readback_out,
         I_SHIFT_CONFIG_REG         => shift_config_reg,
         I_LD_CONFIG_REG            => ld_config_reg,     
         I_LD_DATA_REG              => ld_data_reg,
         I_LD_DATA_OUT              => ld_data_out,
-		I_LD_CS_DELAY_PIPE         => ld_cs_delay_pipe,
-		I_SHIFT_CS_DELAY_PIPE      => shift_cs_delay_pipe,
         O_ALL_BYTES_TRANSFERRED    => all_bits_transferred,
         O_START_OF_TRANSFER        => start_of_transfer,
-		O_END_CS_DELAY             => end_cs_delay,
+	    O_SPI_CNT_LT_16            => spi_cnt_lt_16,
   
         O_VOLTAGE_REG              => O_VOLTAGE_REG,
         O_CURRENT_REG              => O_CURRENT_REG,
         O_TEMP_REG                 => O_TEMP_REG,
-        O_HUMIDITY_REG             => O_HUMIDITY_REG
+        O_HUMIDITY_REG             => O_HUMIDITY_REG,
+		  
+		O_VOLTAGE_READBACK         => O_VOLTAGE_READBACK,
+		O_CURRENT_READBACK         => O_CURRENT_READBACK,
+		O_TEMP_READBACK            => O_TEMP_READBACK,
+		O_HUMIDITY_READBACK        => O_HUMIDITY_READBACK
     );
 
 end BEHAVIORAL;
