@@ -31,10 +31,10 @@ entity SPI_IF is
         O_TEMP_REG                  : out std_logic_vector(15 downto 0);
         O_HUMIDITY_REG              : out std_logic_vector(15 downto 0);
 		  
-		O_VOLTAGE_READBACK          : out std_logic_vector(15 downto 0);
+	O_VOLTAGE_READBACK          : out std_logic_vector(15 downto 0);
         O_CURRENT_READBACK          : out std_logic_vector(15 downto 0);
         O_TEMP_READBACK             : out std_logic_vector(15 downto 0);
-		O_HUMIDITY_READBACK         : out std_logic_vector(15 downto 0));
+	O_HUMIDITY_READBACK         : out std_logic_vector(15 downto 0));
 end SPI_IF;
 
 architecture BEHAVIORAL of SPI_IF is
@@ -49,17 +49,17 @@ architecture BEHAVIORAL of SPI_IF is
         -- Control Signals
         I_ALL_BITS_TRANSFERRED : in  std_logic;
         I_START_OF_TRANSFER    : in  std_logic;
-		I_CONFIG_FLASH         : in  std_logic;
-		I_SPI_CNT_LT_16        : in  std_logic;
+	I_CONFIG_FLASH         : in  std_logic;
+	I_SPI_CNT_LT_16        : in  std_logic;
         O_CLR_SPI_COUNT        : out std_logic;
         O_LD_SPI_COUNT         : out std_logic;
         O_SHIFT_CONFIG_REG     : out std_logic;
         O_LD_CONFIG_REG        : out std_logic;
         O_LD_DATA_REG          : out std_logic;
         O_LD_DATA_OUT          : out std_logic;
-		O_INTERNAL_CLK         : out std_logic;
-		O_LD_CONFIG_READBACK   : out std_logic;
-	    O_LD_READBACK_OUT      : out std_logic;
+	O_INTERNAL_CLK         : out std_logic;
+	O_LD_CONFIG_READBACK   : out std_logic;
+	O_LD_READBACK_OUT      : out std_logic;
 
         -- Physical Data Lines
         O_SCLK                 : out std_logic;
@@ -83,26 +83,26 @@ architecture BEHAVIORAL of SPI_IF is
         -- Control Signals
         I_CLR_SPI_COUNT             : in  std_logic;
         I_LD_SPI_COUNT              : in  std_logic;
-		I_CONFIG_IN_PROCESS         : in  std_logic;
-		I_LD_CONFIG_READBACK        : in  std_logic;
-		I_LD_READBACK_OUT           : in  std_logic;
+	I_CONFIG_IN_PROCESS         : in  std_logic;
+	I_LD_CONFIG_READBACK        : in  std_logic;
+	I_LD_READBACK_OUT           : in  std_logic;
         I_SHIFT_CONFIG_REG          : in  std_logic;
         I_LD_CONFIG_REG             : in  std_logic;
         I_LD_DATA_REG               : in  std_logic;
         I_LD_DATA_OUT               : in  std_logic;
         O_ALL_BYTES_TRANSFERRED     : out std_logic;
         O_START_OF_TRANSFER         : out std_logic;
-		O_SPI_CNT_LT_16             : out std_logic;
+	O_SPI_CNT_LT_16             : out std_logic;
   
         O_VOLTAGE_REG               : out std_logic_vector(15 downto 0);
         O_CURRENT_REG               : out std_logic_vector(15 downto 0);
         O_TEMP_REG                  : out std_logic_vector(15 downto 0);
         O_HUMIDITY_REG              : out std_logic_vector(15 downto 0);
 		  
-		O_VOLTAGE_READBACK          : out std_logic_vector(15 downto 0);
+	O_VOLTAGE_READBACK          : out std_logic_vector(15 downto 0);
         O_CURRENT_READBACK          : out std_logic_vector(15 downto 0);
         O_TEMP_READBACK             : out std_logic_vector(15 downto 0);
-		O_HUMIDITY_READBACK         : out std_logic_vector(15 downto 0));
+	O_HUMIDITY_READBACK         : out std_logic_vector(15 downto 0));
     end Component SPI_TX_RX;
 
     -- Signal Declarations
@@ -114,11 +114,11 @@ architecture BEHAVIORAL of SPI_IF is
     signal ld_config_reg        : std_logic;
     signal ld_data_reg          : std_logic;
     signal ld_data_out          : std_logic;
-	signal internal_clk         : std_logic;
-	signal config_flash         : std_logic := '1';
-	signal spi_cnt_lt_16        : std_logic;
-	signal ld_config_readback    : std_logic;
-	signal ld_readback_out      : std_logic;
+    signal internal_clk         : std_logic;
+    signal config_flash         : std_logic := '1';
+    signal spi_cnt_lt_16        : std_logic;
+    signal ld_config_readback    : std_logic;
+    signal ld_readback_out      : std_logic;
 	 
 
 begin
@@ -133,17 +133,17 @@ begin
         -- Control Signals
         I_ALL_BITS_TRANSFERRED      => all_bits_transferred,
         I_START_OF_TRANSFER         => start_of_transfer,
-		I_CONFIG_FLASH              => config_flash,
-		I_SPI_CNT_LT_16             => spi_cnt_lt_16,
+	I_CONFIG_FLASH              => config_flash,
+	I_SPI_CNT_LT_16             => spi_cnt_lt_16,
         O_CLR_SPI_COUNT             => clr_spi_cnt,        
         O_LD_SPI_COUNT              => ld_spi_cnt,         
         O_SHIFT_CONFIG_REG          => shift_config_reg,     
         O_LD_CONFIG_REG             => ld_config_reg,        
         O_LD_DATA_REG               => ld_data_reg,          
         O_LD_DATA_OUT               => ld_data_out, 
-		O_INTERNAL_CLK              => internal_clk,
-		O_LD_CONFIG_READBACK        => ld_config_readback,
-		O_LD_READBACK_OUT           => ld_readback_out,
+	O_INTERNAL_CLK              => internal_clk,
+	O_LD_CONFIG_READBACK        => ld_config_readback,
+	O_LD_READBACK_OUT           => ld_readback_out,
 
         -- Physical Data Lines
         O_SCLK                      => O_SCLK,
@@ -167,26 +167,26 @@ begin
         -- Control Signals
         I_CLR_SPI_COUNT            => clr_spi_cnt,
         I_LD_SPI_COUNT             => ld_spi_cnt,
-		I_CONFIG_IN_PROCESS        => config_flash,
-		I_LD_CONFIG_READBACK       => ld_config_readback,
-		I_LD_READBACK_OUT          => ld_readback_out,
+	I_CONFIG_IN_PROCESS        => config_flash,
+	I_LD_CONFIG_READBACK       => ld_config_readback,
+	I_LD_READBACK_OUT          => ld_readback_out,
         I_SHIFT_CONFIG_REG         => shift_config_reg,
         I_LD_CONFIG_REG            => ld_config_reg,     
         I_LD_DATA_REG              => ld_data_reg,
         I_LD_DATA_OUT              => ld_data_out,
         O_ALL_BYTES_TRANSFERRED    => all_bits_transferred,
         O_START_OF_TRANSFER        => start_of_transfer,
-	    O_SPI_CNT_LT_16            => spi_cnt_lt_16,
+	O_SPI_CNT_LT_16            => spi_cnt_lt_16,
   
         O_VOLTAGE_REG              => O_VOLTAGE_REG,
         O_CURRENT_REG              => O_CURRENT_REG,
         O_TEMP_REG                 => O_TEMP_REG,
         O_HUMIDITY_REG             => O_HUMIDITY_REG,
 		  
-		O_VOLTAGE_READBACK         => O_VOLTAGE_READBACK,
-		O_CURRENT_READBACK         => O_CURRENT_READBACK,
-		O_TEMP_READBACK            => O_TEMP_READBACK,
-		O_HUMIDITY_READBACK        => O_HUMIDITY_READBACK
+	O_VOLTAGE_READBACK         => O_VOLTAGE_READBACK,
+	O_CURRENT_READBACK         => O_CURRENT_READBACK,
+	O_TEMP_READBACK            => O_TEMP_READBACK,
+	O_HUMIDITY_READBACK        => O_HUMIDITY_READBACK
     );
 
 end BEHAVIORAL;

@@ -17,16 +17,16 @@ entity SPI_CTRL is
         -- Control Signals
         I_ALL_BITS_TRANSFERRED : in  std_logic;
         I_START_OF_TRANSFER    : in  std_logic;
-		I_CONFIG_FLASH         : in  std_logic;
-		I_SPI_CNT_LT_16        : in  std_logic;
+	I_CONFIG_FLASH         : in  std_logic;
+	I_SPI_CNT_LT_16        : in  std_logic;
         O_CLR_SPI_COUNT        : out std_logic;
         O_LD_SPI_COUNT         : out std_logic;
         O_SHIFT_CONFIG_REG     : out std_logic;
         O_LD_CONFIG_REG        : out std_logic;
         O_LD_DATA_REG          : out std_logic;
         O_LD_DATA_OUT          : out std_logic;
-	    O_INTERNAL_CLK         : out std_logic;
-		O_LD_CONFIG_READBACK   : out std_logic;
+	O_INTERNAL_CLK         : out std_logic;
+	O_LD_CONFIG_READBACK   : out std_logic;
      	O_LD_READBACK_OUT      : out std_logic;        
      
         -- Physical Data Lines
@@ -44,7 +44,7 @@ architecture BEHAVIORAL of SPI_CTRL is
     signal start_sample    : std_logic;
     signal sample_ctr      : std_logic_vector(21 downto 0) := (others => '0'); -- counts ticks b/w sample edges (10-bits is a guess)
     signal internal_clk    : std_logic;
-	signal divide_by_8_cnt : std_logic_vector( 3 downto 0) := (others => '0');
+    signal divide_by_8_cnt : std_logic_vector( 3 downto 0) := (others => '0');
 	 
     -- FSM Type(s)
     type   T_SPI_COUNT is (S_CLEAR, S_WAIT_CSSC, S_DELAY, S_COUNT, S_WAIT_SCCS);
@@ -100,7 +100,7 @@ begin
     -- Count Control Transition Logic
     SPI_Count_Transition : process(spi_count, start_sample, I_ALL_BITS_TRANSFERRED) begin -- remember to add to sensitivity lis
 		  
-		  case spi_count is
+	case spi_count is
             when S_CLEAR =>
                 if start_sample = '1' then
                     spi_count_next <= S_WAIT_CSSC;
@@ -108,26 +108,24 @@ begin
                     spi_count_next <= S_CLEAR;
                 end if;
 					 
-				when S_WAIT_CSSC =>
-					spi_count_next <= S_DELAY;
+	    when S_WAIT_CSSC =>
+		spi_count_next <= S_DELAY;
 					
-
             when S_DELAY =>
-                    spi_count_next <= S_COUNT;
+                spi_count_next <= S_COUNT;
                     
-
             when S_COUNT =>
-                    if I_ALL_BITS_TRANSFERRED = '1' then
-                        spi_count_next <= S_WAIT_SCCS;
-                    else 	
-                        spi_count_next <= S_DELAY;
-                    end if;
+	        if I_ALL_BITS_TRANSFERRED = '1' then
+		    spi_count_next <= S_WAIT_SCCS;
+	        else 	
+		    spi_count_next <= S_DELAY;
+	        end if;
 						  
-				when S_WAIT_SCCS =>
-					spi_count_next <= S_CLEAR;
+	    when S_WAIT_SCCS =>
+		spi_count_next <= S_CLEAR;
 
             when others =>
-                    spi_count_next <= S_CLEAR;
+                spi_count_next <= S_CLEAR;
                         
         end case;
     end process SPI_Count_Transition;
@@ -225,7 +223,7 @@ begin
     O_LD_CONFIG_REG           <= '1' when ( spi_data_mosi = S_LOAD_MOSI)                                else '0';
     O_LD_DATA_OUT             <= '1' when ((spi_data_miso = S_LOAD_MISO)  and I_SPI_CNT_LT_16 = '1')    else '0';
     O_LD_DATA_REG             <= '1' when ((spi_data_miso = S_SHIFT_MISO) and I_SPI_CNT_LT_16 = '1')    else '0';
-	O_LD_CONFIG_READBACK      <= '1' when ((spi_data_miso = S_SHIFT_MISO) and I_SPI_CNT_LT_16 = '0')    else '0';
+    O_LD_CONFIG_READBACK      <= '1' when ((spi_data_miso = S_SHIFT_MISO) and I_SPI_CNT_LT_16 = '0')    else '0';
     O_LD_READBACK_OUT         <= '1' when ((spi_data_miso = S_LOAD_MISO)  and I_SPI_CNT_LT_16 = '0')    else '0';
 
 end BEHAVIORAL;
