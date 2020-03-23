@@ -1,1 +1,3 @@
 4-20mA Detector Interface Senior Design Project WCP03
+
+Halted in Spring 2020 semester due to COVID-19, to be continued by class of 2021 ECE students...
